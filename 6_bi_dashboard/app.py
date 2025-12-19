@@ -18,13 +18,18 @@ st.set_page_config(
 )
 
 # -----------------------------------------------------------
-STAGING_LOCAL_PATH = '/app/9_staging_local' 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-FACT_PARQUET_PATH = os.path.join(STAGING_LOCAL_PATH, 'dw_fact_shipments.parquet') 
-DIM_MARKET_PATH = os.path.join(STAGING_LOCAL_PATH, 'dim_market.parquet')
-DIM_SHIPPING_PATH = os.path.join(STAGING_LOCAL_PATH, 'dim_shipping.parquet') 
-DIM_CUSTOMER_PATH = os.path.join(STAGING_LOCAL_PATH, 'dim_customer.parquet')
-MODEL_PATH = os.path.join('/app/5_ml_model/model_artifacts', 'xgb_otd_model.joblib')
+STAGING_LOCAL_PATH = os.path.join(BASE_DIR, "..", "9_staging_local")
+
+FACT_PARQUET_PATH = os.path.join(STAGING_LOCAL_PATH, "dw_fact_shipments.parquet")
+DIM_MARKET_PATH = os.path.join(STAGING_LOCAL_PATH, "dim_market.parquet")
+DIM_SHIPPING_PATH = os.path.join(STAGING_LOCAL_PATH, "dim_shipping.parquet")
+DIM_CUSTOMER_PATH = os.path.join(STAGING_LOCAL_PATH, "dim_customer.parquet")
+
+MODEL_PATH = os.path.join(
+    BASE_DIR, "..", "5_ml_model", "model_artifacts", "xgb_otd_model.joblib"
+)
 # -----------------------------------------------------------
 
 
