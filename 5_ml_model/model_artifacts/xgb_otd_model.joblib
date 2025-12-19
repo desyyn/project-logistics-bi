@@ -1,0 +1,29 @@
+
+==================== XGBoost OTD MODEL REPORT (TUNED) ====================
+Total Train Rows: 7799
+Total Test Rows: 3343
+Target Distribution (Test Set): Counter({0: 1672, 1: 1671})
+Best Params: {'subsample': 0.5, 'reg_lambda': 1, 'reg_alpha': 0, 'n_estimators': 1000, 'min_child_weight': 1, 'max_depth': 8, 'learning_rate': 0.01, 'gamma': 0, 'colsample_bytree': 0.3, 'colsample_bylevel': 0.9}
+
+Accuracy: 0.7392
+F1-Score: 0.7130
+ROC AUC: 0.7980
+RMSE: 0.4231
+
+Confusion Matrix:
+[[1388  284]
+ [ 588 1083]]
+
+Top Features:
+shipping_mode_Standard Class    0.825063
+shipping_mode_Second Class      0.054546
+order_item_discount_rate        0.014486
+profit_per_quantity             0.012726
+order_item_profit_ratio         0.012668
+profit_per_order                0.012484
+effective_discount              0.012181
+discount_ratio                  0.012130
+profit_over_quantity            0.011197
+order_day                       0.011085
+sales                           0.010759
+order_month                     0.010675
