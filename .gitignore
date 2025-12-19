@@ -1,0 +1,40 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv
+venv/
+ENV/
+env/
+.env
+
+# --- Airflow ---
+airflow_logs/
+logs/
+airflow.cfg
+airflow.db
+unittests.cfg
+*.pid
+
+# --- Docker & Database ---
+pg_data/
+.docker/
+docker-compose.override.yml
+
+# --- Data Sources & ML Artifacts ---
+# Jangan upload dataset mentah atau dataset olahan yang besar
+4_data_sources/*.csv
+9_staging_local/*.parquet
+9_staging_local/*.csv
+/tmp/
+
+# Jangan upload model machine learning (gunakan git lfs jika ingin diupload)
+5_ml_model/model_artifacts/*.joblib
+5_ml_model/model_artifacts/*.pkl
+5_ml_model/model_artifacts/*.txt
+
+# --- OS & IDE ---
+.DS_Store
+.idea/
+.vscode/
+*.swp

@@ -1,0 +1,113 @@
+version: '3.7'
+
+x-airflow-common:
+  &airflow-common
+  build: .
+  user: "${AIRFLOW_UID:-50000}:0"
+  env_file:
+    - .env
+
+  environment:
+    OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+    AIRFLOW_CONN_POSTGRES_DEFAULT: postgresql://airflow:airflow@postgres:5432/airflow
+    PYTHONPATH: /opt/airflow/etl_scripts:$PYTHONPATH
+
+  volumes:
+    - ./1_dw_setup:/opt/airflow/1_dw_setup
+    - ./2_airflow_dags:/opt/airflow/dags
+    - ./3_etl_scripts:/opt/airflow/etl_scripts
+    - ./4_data_sources:/opt/airflow/data_sources
+    - ./5_ml_model:/opt/airflow/ml_model
+    - ./airflow_logs:/opt/airflow/logs
+    - ./requirements.txt:/opt/airflow/requirements.txt
+    - ./8_output:/opt/airflow/output
+    - ./9_staging_local:/opt/airflow/local_staging
+  depends_on:
+    - postgres
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: uas-bi-postgres
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
+
+  airflow-init:
+    <<: *airflow-common
+    container_name: uas-bi-airflow-init
+    entrypoint: /bin/bash
+    command: 
+      - -c 
+      - |
+        airflow db init
+        airflow users create \
+          --username admin \
+          --firstname Dessy \
+          --lastname Nurulita \
+          --role Admin \
+          --email 2310817220024@mhs.ulm.ac.id \
+          --password airflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: uas-bi-airflow-webserver
+    command: ["airflow", "webserver"]
+    ports:
+      - "8084:8080"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+    depends_on:
+      postgres:
+        condition: service_healthy 
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: uas-bi-airflow-scheduler
+    command: ["airflow", "scheduler"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    container_name: uas-bi-streamlit
+    working_dir: /app
+    volumes:
+      - ./6_bi_dashboard:/app 
+      - ./9_staging_local:/app/9_staging_local 
+      - ./5_ml_model/model_artifacts:/app/5_ml_model/model_artifacts
+    environment:
+      POSTGRES_HOST: postgres
+    command: ["streamlit", "run", "app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
+    ports:
+      - "8501:8501"
+    depends_on:
+      - postgres
+
+volumes:
+  pg_data: {}
+  airflow_logs: {}
